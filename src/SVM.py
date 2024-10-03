@@ -1,14 +1,24 @@
 import numpy as np
-class LinearSVM:
-    def __init__(self, learning_rate=0.01, epochs=100):
+class LSVM:
+    def __init__(self, learning_rate, epochs):
         self.learning_rate = learning_rate
         self.epochs = epochs
-        self.regularization_param = 0.01
-        self.weights = None
+
+        self.rP = 0.01
+        self.weights = 0
         self.bias = 0
 
+
     def forward(self, X):
-        # Calculate the margin score for classification
+        #We utalize the dot product here to find the forward prediction value
+        total = 0
+        index = 0
+        #print("INPUT LIST" + str(X))
+        for i in X:
+            total += i * self.weights[index]
+            index += 1
+        total += self.bias
+        #print(total)
         return np.dot(X, self.weights) + self.bias
 
     def fit(self, X, y):
@@ -23,11 +33,12 @@ class LinearSVM:
             for i in range(num_samples):
                 condition = y_[i] * self.forward(X[i]) >= 1
                 if condition:
-                    self.weights -= self.learning_rate * (2 * self.regularization_param * self.weights)
+                    self.weights -= self.learning_rate * (2 * self.rP * self.weights)
                 else:
                     self.weights -= self.learning_rate * (
-                                2 * self.regularization_param * self.weights - np.dot(X[i], y_[i]))
+                            2 * self.rP * self.weights - np.dot(X[i], y_[i]))
                     self.bias -= self.learning_rate * y_[i]
 
     def predict(self, X):
+
         return np.sign(self.forward(X))
