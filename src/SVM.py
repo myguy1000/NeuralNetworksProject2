@@ -13,13 +13,16 @@ class LSVM:
         #We utalize the dot product here to find the forward prediction value
         total = 0
         index = 0
-        #print("INPUT LIST" + str(X))
+        #print(X)
+        if np.array(X).ndim == 2:
+            X = X.flatten()
+
+
         for i in X:
             total += i * self.weights[index]
             index += 1
         total += self.bias
-        #print(total)
-        return np.dot(X, self.weights) + self.bias
+        return total
 
     def fit(self, X, y):
         num_samples, num_features = X.shape
@@ -40,5 +43,24 @@ class LSVM:
                     self.bias -= self.learning_rate * y_[i]
 
     def predict(self, X):
+        total = 0
+        index = 0
+        return_val = 0
+        # print(X)
+        if np.array(X).ndim == 2:
+            X = X.flatten()
 
-        return np.sign(self.forward(X))
+
+        for i in X:
+            total += i * self.weights[index]
+            index += 1
+        if total > 0:
+            return_val = 1
+        elif total < 0:
+            return_val = -1
+        elif total == 0:
+            return_val = 0
+        else:
+            print("ERROR WITH SVM PREDICT")
+
+        return return_val
