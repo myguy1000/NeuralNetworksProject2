@@ -1,9 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import gzip
-#from sklearn.datasets import load_digits, fetch_covtype # use if importing straight from the website instead of from the downloaded data file
+from sklearn.datasets import load_digits  # Uncommented to load the digits dataset
+from sklearn.model_selection import train_test_split  # Added for splitting the dataset
+from sklearn.preprocessing import StandardScaler  # Added for data standardization
+# from sklearn.datasets import load_digits, fetch_covtype # Use if importing straight from the website instead of from the downloaded data file
 from utils import incorrectlyClassified, makeCurrentPlot
 from perceptron import Perceptron  # Ensure the class is saved as current_perceptron.py
+from WestonWatkins import WestonWatkinsSVM  # Importing the WestonWatkinsSVM class
 
 THRESHOLD = 0
 #the magnitude at which the models weights are updated during a single increment
@@ -28,8 +32,41 @@ print(X.shape)
 maxP = 1
 minP = -1
 #perceptron_1 = Perceptron(input_size_1,minP,maxP,THRESHOLD)
-
 #perceptron_1.fit(trainingDataX1, trainingDataY1, LEARNING_RATE, NUM_EPOCHS)
+
+# ----------------- Weston-Watkins SVM Testing Code -----------------
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Standardize data
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Initialize the Weston-Watkins SVM
+input_size = X_train.shape[1]
+num_classes = len(np.unique(y))
+svm = WestonWatkinsSVM(
+    input_size=input_size,
+    num_classes=num_classes,
+    min_value=minP,
+    max_value=maxP,
+    learning_rate=LEARNING_RATE,
+    regularization=0.001  # Adjust this regularization parameter as needed
+)
+
+# Train the model
+svm.fit(X_train, y_train, NUM_EPOCHS)
+
+# Predict and evaluate
+predictions = svm.predict(X_test)
+
+# Calculate accuracy
+accuracy = np.mean(predictions == y_test)
+print(f"Weston-Watkins SVM Accuracy: {accuracy}")
+
+# -------------------------------------------------------------------
 
 # Dataset 2: covtype
 # Open the .gz file and load it into a NumPy array
