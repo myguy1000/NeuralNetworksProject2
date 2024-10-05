@@ -17,6 +17,7 @@ class LogisticRegression:
     def forward(self, inputs):
         linear = np.dot(inputs, self.weights) + self.bias
         pred = self.sigmoid(linear)
+        #print("LogReg pred: ", pred)
         #use threshold to determine Label
         if pred > self.threshold:
             return 1

@@ -1,8 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt 
-from logisticRegression import LogisticRegression
-from SVM import LSVM
-from WidrowHoff import WidrowHoff
 
 """
 incorrectlyClassified examines each data point and determines if it is correctly classified into the correct class
@@ -13,7 +10,7 @@ def incorrectlyClassified(perceptron, xInputs, yInputs, p_type):
         incorrect = 0
         for i in range(len(xInputs)):
             nextPrediction = perceptron.predict(np.array([xInputs[i]]))  # Get prediction for a single point
-            print("current prediction: ", nextPrediction)
+#            print("current prediction: ", nextPrediction)
             correct = 1 if yInputs[i] == 1 else -1  # Convert correct labels to +1 and -1
             if nextPrediction != correct:
                 incorrect += 1
@@ -23,7 +20,7 @@ def incorrectlyClassified(perceptron, xInputs, yInputs, p_type):
         incorrect = 0
         for i in range(len(xInputs)):
             nextPrediction = perceptron.forward(xInputs[i])
-            print("current prediction: ", nextPrediction)
+###            print("current prediction: ", nextPrediction)
             correct = yInputs[i]
             if nextPrediction != correct:
                 incorrect = incorrect + 1

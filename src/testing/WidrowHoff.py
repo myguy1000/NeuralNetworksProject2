@@ -19,5 +19,7 @@ class WidrowHoff:
                 prediction = self.forward(x)
 
                 errors = output - prediction
+                ##print("len(output): ", len(output))
+                ##print(
                 self.weights += self.learning_rate * np.dot(inputs.T, errors) /len(output)
                 self.bias += self.learning_rate * np.mean(errors)

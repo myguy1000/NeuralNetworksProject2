@@ -1,3 +1,4 @@
+from utils import incorrectlyClassified
 import numpy as np
 class LSVM:
     def __init__(self, learning_rate, epochs):
@@ -42,25 +43,31 @@ class LSVM:
                             2 * self.rP * self.weights - np.dot(X[i], y_[i]))
                     self.bias -= self.learning_rate * y_[i]
 
+#            y_pred = self.predict(X)
+#            count = 0
+#            for i in range(y.shape[0]):
+#                if y_pred[i] == y[i]:
+#                    count += 0
+#                else:
+#                    count += 1
+#            print("SVM: # misclassified at epoch {epoch}: ", count)
+            svm_misclassified_train = incorrectlyClassified(self, X, y, "SVM")
+            ###print(f"SVM: # misclassified at epoch {epoch}: ", svm_misclassified_train)
     def predict(self, X):
         total = 0
         index = 0
         return_val = 0
-        # print(X)
         if np.array(X).ndim == 2:
             X = X.flatten()
-
-
         for i in X:
             total += i * self.weights[index]
             index += 1
-        if total > 0:
+        ###print("total: ", total)
+        if total > 0.5:
             return_val = 1
-        elif total < 0:
-            return_val = -1
-        elif total == 0:
+        elif total <= 0.5:
             return_val = 0
         else:
             print("ERROR WITH SVM PREDICT")
-
+        ###print("return_val: ", return_val)
         return return_val
