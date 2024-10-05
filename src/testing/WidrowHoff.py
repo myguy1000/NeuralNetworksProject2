@@ -9,17 +9,21 @@ class WidrowHoff:
 
 
     def forward(self, inputs):
-        return np.dot(inputs,self.weights) + self.bias
+        weighted_sum = np.dot(inputs, self.weights) + self.bias
+        return np.where(weighted_sum >= 0, 1, 0)
 
     def fit(self, inputs, output):
-        # Train the current_perceptron using the current_perceptron learning algorithm
+        inputs = inputs.astype(np.float32)  # Ensure inputs are float
+        output = output.astype(np.float32)  # Ensure output is float
         z = range(self.num_epochs)
         for i in z:
             for x in inputs:
                 prediction = self.forward(x)
 
                 errors = output - prediction
-                ##print("len(output): ", len(output))
-                ##print(
-                self.weights += self.learning_rate * np.dot(inputs.T, errors) /len(output)
+                self.weights += self.learning_rate * np.dot(inputs.T, errors) / len(output)
                 self.bias += self.learning_rate * np.mean(errors)
+
+                # Clip weights to prevent overflow
+                self.weights = np.clip(self.weights, -1e10, 1e10)
+                self.bias = np.clip(self.bias, -1e10, 1e10)

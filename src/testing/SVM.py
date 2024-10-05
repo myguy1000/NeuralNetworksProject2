@@ -51,7 +51,7 @@ class LSVM:
 #                else:
 #                    count += 1
 #            print("SVM: # misclassified at epoch {epoch}: ", count)
-            svm_misclassified_train = incorrectlyClassified(self, X, y, "SVM")
+#            svm_misclassified_train = incorrectlyClassified(self, X, y, "SVM")
             ###print(f"SVM: # misclassified at epoch {epoch}: ", svm_misclassified_train)
     def predict(self, X):
         total = 0
@@ -63,9 +63,9 @@ class LSVM:
             total += i * self.weights[index]
             index += 1
         ###print("total: ", total)
-        if total > 0.5:
+        if total > 0:
             return_val = 1
-        elif total <= 0.5:
+        elif total <= 0:
             return_val = 0
         else:
             print("ERROR WITH SVM PREDICT")

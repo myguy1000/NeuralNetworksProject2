@@ -5,7 +5,7 @@ class LSVM:
         self.epochs = epochs
 
         self.rP = 0.01
-        self.weights = 0
+        self.weights = 1
         self.bias = 0
 
 

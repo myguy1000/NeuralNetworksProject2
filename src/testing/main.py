@@ -10,7 +10,7 @@ from WidrowHoff import WidrowHoff
 
 #THRESHOLD = 0
 LEARNING_RATE = 0.01
-NUM_EPOCHS = 100
+NUM_EPOCHS = 1
 
 
 
@@ -41,21 +41,21 @@ num_inputs = X_train.shape[1]
 
 #generate perceptrons with input values
 lr = LogisticRegression(num_inputs, LEARNING_RATE, NUM_EPOCHS, 0.5, -1, 1) # third to last arg is the threshold
-#svm = LSVM(LEARNING_RATE, NUM_EPOCHS)
-#wh = WidrowHoff(num_inputs, LEARNING_RATE, NUM_EPOCHS, -1, 1)
+svm = LSVM(LEARNING_RATE, NUM_EPOCHS)
+wh = WidrowHoff(num_inputs, LEARNING_RATE, NUM_EPOCHS, -1, 1)
 
 #fit perceptrons
 lr.fit(X_train, y_train)
-#svm.fit(X_train, y_train)
-#wh.fit(X_train, y_train)
+svm.fit(X_train, y_train)
+wh.fit(X_train, y_train)
 
 ##Count the number of misclassified data samples and print
 lr_misclassified_train = incorrectlyClassified(lr, X_train, y_train, "LR")
 lr_misclassified_test = incorrectlyClassified(lr, X_test, y_test, "LR")
-#svm_misclassified_train = incorrectlyClassified(svm, X_train, y_train, "SVM")
-#svm_misclassified_test = incorrectlyClassified(svm, X_test, y_test, "SVM")
-#wh_misclassified_train = incorrectlyClassified(wh, X_train, y_train, "WH")
-#wh_misclassified_test = incorrectlyClassified(wh, X_test, y_test, "WH")
+svm_misclassified_train = incorrectlyClassified(svm, X_train, y_train, "SVM")
+svm_misclassified_test = incorrectlyClassified(svm, X_test, y_test, "SVM")
+wh_misclassified_train = incorrectlyClassified(wh, X_train, y_train, "WH")
+wh_misclassified_test = incorrectlyClassified(wh, X_test, y_test, "WH")
 
 # number of samples/rows
 num_samples_train = X_train.shape[0]
@@ -68,11 +68,15 @@ print("num samples test: ", num_samples_test)
 print("Logistic regression test accuracy: ", lr_misclassified_train)
 print("Logistic regression test accuracy: ", lr_misclassified_test)
 
-#print("SVM train accuracy: ", 1 - (svm_misclassified_train / num_samples_train))
-#print("SVM test accuracy: ", 1 - (svm_misclassified_test / num_samples_test))
+print("SVM INCORRECT: " + str(svm_misclassified_test))
 
-#print("WidrowHoff train accuracy: ", wh_misclassified_train / num_samples_train)
-#print("WidrowHoff test accuracy: ", wh_misclassified_test / num_samples_test)
+print("SVM train accuracy: ", 1- (svm_misclassified_train / num_samples_train))
+print("SVM test accuracy: ", 1- (svm_misclassified_test / num_samples_test))
+
+print("Widrow INCORRECT: " + str(wh_misclassified_test))
+
+print("WidrowHoff train accuracy: ", 1 -(wh_misclassified_train / num_samples_train))
+print("WidrowHoff test accuracy: ", 1-(wh_misclassified_test / num_samples_test))
 
 
 

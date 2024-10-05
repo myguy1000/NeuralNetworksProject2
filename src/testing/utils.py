@@ -8,19 +8,37 @@ returns an integer number that is the number of data points/samples that have be
 def incorrectlyClassified(perceptron, xInputs, yInputs, p_type): 
     if p_type == "SVM":
         incorrect = 0
+
         for i in range(len(xInputs)):
             nextPrediction = perceptron.predict(np.array([xInputs[i]]))  # Get prediction for a single point
-#            print("current prediction: ", nextPrediction)
-            correct = 1 if yInputs[i] == 1 else -1  # Convert correct labels to +1 and -1
-            if nextPrediction != correct:
+
+            correct = 1 if yInputs[i] == nextPrediction else 0  # Convert correct labels to +1 and -1
+            if correct != 1:
                 incorrect += 1
         return incorrect
 
+    elif p_type == "WH":
+
+        incorrect = 0
+        for i in range(len(xInputs)):
+            nextPrediction = perceptron.forward(xInputs[i])
+
+            ###            print("current prediction: ", nextPrediction)
+            correct = yInputs[i]
+            #print("NEXT PREDICTION: " + str(nextPrediction))
+            #print("Correct: " + str(correct))
+            if nextPrediction != correct:
+                incorrect = incorrect + 1
+            else:
+                incorrect = incorrect + 0
+        return incorrect
     else:
+
         incorrect = 0
         for i in range(len(xInputs)):
             nextPrediction = perceptron.forward(xInputs[i])
 ###            print("current prediction: ", nextPrediction)
+
             correct = yInputs[i]
             if nextPrediction != correct:
                 incorrect = incorrect + 1
