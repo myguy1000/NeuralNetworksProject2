@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 from sklearn.datasets import load_digits, load_wine  # Use if importing straight from the website instead of from the downloaded data file
 from sklearn.model_selection import train_test_split
 from utils import incorrectlyClassified, makeCurrentPlot
-
 from logisticRegression import LogisticRegression
 from SVM import LSVM
 from WidrowHoff import WidrowHoff
@@ -13,7 +12,7 @@ from WestonWatkins import WestonWatkinsSVM  # Import the WestonWatkinsSVM class
 LEARNING_RATE = 0.01
 NUM_EPOCHS = 100
 
-# Dataset 1: digits
+# Dataset 1: digits (binary classification between 0 and 1)
 print("digits dataset")
 digits = load_digits()
 X, y = digits.data, digits.target
@@ -34,7 +33,7 @@ lr = LogisticRegression(num_inputs, LEARNING_RATE, NUM_EPOCHS, 0.5, -1, 1)  # Th
 svm = LSVM(LEARNING_RATE, NUM_EPOCHS)
 wh = WidrowHoff(num_inputs, LEARNING_RATE, NUM_EPOCHS, -1, 1)
 
-# Instantiate the Weston Watkins SVM
+# Instantiate the Weston Watkins SVM for binary classification
 num_classes = 2  # For binary classification
 regularization = 0.01  # Regularization parameter
 ww_svm = WestonWatkinsSVM(
@@ -85,3 +84,56 @@ print("WidrowHoff test accuracy: ", 1 - (wh_misclassified_test / num_samples_tes
 
 print("Weston Watkins SVM train accuracy: ", 1 - (ww_misclassified_train / num_samples_train))
 print("Weston Watkins SVM test accuracy: ", 1 - (ww_misclassified_test / num_samples_test))
+
+# --------------------------------------------------------------
+# Part 4: Testing the Weston-Watkins SVM using a scikit-learn dataset for multiclass classification.
+
+print("\nDigits dataset (Multiclass Classification)")
+
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+# Load the digits dataset with all classes
+digits = load_digits()
+X_multi, y_multi = digits.data, digits.target
+
+# Split into train and test datasets
+X_train_multi, X_test_multi, y_train_multi, y_test_multi = train_test_split(X_multi, y_multi, test_size=0.2, random_state=42)
+
+# Number of classes
+num_classes_multi = len(np.unique(y_multi))
+print("Number of classes:", num_classes_multi)
+
+# Define the number of features
+num_inputs_multi = X_train_multi.shape[1]
+
+# Instantiate the Weston Watkins SVM for multiclass classification
+ww_svm_multi = WestonWatkinsSVM(
+    input_size=num_inputs_multi,
+    num_classes=num_classes_multi,
+    min_value=-1,
+    max_value=1,
+    learning_rate=LEARNING_RATE,
+    regularization=regularization
+)
+
+# Fit the model
+ww_svm_multi.fit(X_train_multi, y_train_multi, NUM_EPOCHS)
+
+# Predict on training and test data
+ww_predictions_train_multi = ww_svm_multi.predict(X_train_multi)
+ww_predictions_test_multi = ww_svm_multi.predict(X_test_multi)
+
+# Calculate accuracies
+ww_train_accuracy_multi = accuracy_score(y_train_multi, ww_predictions_train_multi)
+ww_test_accuracy_multi = accuracy_score(y_test_multi, ww_predictions_test_multi)
+
+# Print the results
+print("Weston Watkins SVM train accuracy (multiclass):", ww_train_accuracy_multi)
+print("Weston Watkins SVM test accuracy (multiclass):", ww_test_accuracy_multi)
+
+# Optionally, print classification report and confusion matrix
+print("\nClassification Report (Test Data):")
+print(classification_report(y_test_multi, ww_predictions_test_multi))
+
+print("\nConfusion Matrix (Test Data):")
+print(confusion_matrix(y_test_multi, ww_predictions_test_multi))
