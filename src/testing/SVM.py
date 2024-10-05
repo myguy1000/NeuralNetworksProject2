@@ -33,6 +33,7 @@ class LSVM:
         y_ = np.where(y <= 0, -1, 1)
 
         # Training loop
+
         for epoch in range(self.epochs):
             for i in range(num_samples):
                 condition = y_[i] * self.forward(X[i]) >= 1

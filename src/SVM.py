@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn import svm
 class LSVM:
     def __init__(self, learning_rate, epochs):
         self.learning_rate = learning_rate
@@ -17,7 +18,6 @@ class LSVM:
         if np.array(X).ndim == 2:
             X = X.flatten()
 
-
         for i in X:
             total += i * self.weights[index]
             index += 1
@@ -32,9 +32,11 @@ class LSVM:
         y_ = np.where(y <= 0, -1, 1)
 
         # Training loop
+
         for epoch in range(self.epochs):
             for i in range(num_samples):
-                condition = y_[i] * self.forward(X[i]) >= 1
+
+                condition = y_[i] * self.forward(X[i]) >= 0
                 if condition:
                     self.weights -= self.learning_rate * (2 * self.rP * self.weights)
                 else:

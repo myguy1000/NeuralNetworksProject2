@@ -16,12 +16,14 @@ class WidrowHoff:
         inputs = inputs.astype(np.float32)  # Ensure inputs are float
         output = output.astype(np.float32)  # Ensure output is float
         z = range(self.num_epochs)
+
         for i in z:
             for x in inputs:
                 prediction = self.forward(x)
 
                 errors = output - prediction
-                self.weights += self.learning_rate * np.dot(inputs.T, errors) / len(output)
+
+                self.weights += self.learning_rate * np.dot(inputs.T, errors)
                 self.bias += self.learning_rate * np.mean(errors)
 
                 # Clip weights to prevent overflow

@@ -10,7 +10,7 @@ from WidrowHoff import WidrowHoff
 
 #THRESHOLD = 0
 LEARNING_RATE = 0.01
-NUM_EPOCHS = 1
+NUM_EPOCHS = 100
 
 
 
