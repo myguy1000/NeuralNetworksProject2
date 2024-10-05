@@ -12,7 +12,7 @@ from WestonWatkins import WestonWatkinsSVM  # Import the WestonWatkinsSVM class
 LEARNING_RATE = 0.01
 NUM_EPOCHS = 100
 
-# Dataset 1: digits (binary classification between 0 and 1)
+# Dataset 1: digits
 print("digits dataset")
 digits = load_digits()
 X, y = digits.data, digits.target
@@ -39,9 +39,10 @@ regularization = 0.01  # Regularization parameter
 ww_svm = WestonWatkinsSVM(
     input_size=num_inputs,
     num_classes=num_classes,
+    learning_rate=LEARNING_RATE,
+    num_epochs=NUM_EPOCHS,
     min_value=-1,
     max_value=1,
-    learning_rate=LEARNING_RATE,
     regularization=regularization
 )
 
@@ -49,7 +50,7 @@ ww_svm = WestonWatkinsSVM(
 lr.fit(X_train, y_train)
 svm.fit(X_train, y_train)
 wh.fit(X_train, y_train)
-ww_svm.fit(X_train, y_train, NUM_EPOCHS)
+ww_svm.fit(X_train, y_train)  # Note: Updated to remove num_epochs parameter
 
 # Count the number of misclassified data samples and print
 lr_misclassified_train = incorrectlyClassified(lr, X_train, y_train, "LR")
@@ -110,14 +111,15 @@ num_inputs_multi = X_train_multi.shape[1]
 ww_svm_multi = WestonWatkinsSVM(
     input_size=num_inputs_multi,
     num_classes=num_classes_multi,
+    learning_rate=LEARNING_RATE,
+    num_epochs=NUM_EPOCHS,
     min_value=-1,
     max_value=1,
-    learning_rate=LEARNING_RATE,
     regularization=regularization
 )
 
 # Fit the model
-ww_svm_multi.fit(X_train_multi, y_train_multi, NUM_EPOCHS)
+ww_svm_multi.fit(X_train_multi, y_train_multi)
 
 # Predict on training and test data
 ww_predictions_train_multi = ww_svm_multi.predict(X_train_multi)
