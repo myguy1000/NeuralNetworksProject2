@@ -26,7 +26,7 @@ class LogisticRegression:
 
     # Training the model using gradient descent
     def fit(self, inputs, outputs):
-
+        count = 0
         # Gradient descent
         for _ in range(self.num_epochs):
             #Linear Regression: w.T * X + b
@@ -38,6 +38,8 @@ class LogisticRegression:
             #print("reshaped_weights.shape: ", reshaped_weights.shape)
             linear_model = np.dot(inputs, self.weights) + self.bias
             #Use sigmoid to get Logistic regression
+            print(f"activation at {count}: ", linear_model)
+            count = count + 1
             pred = self.sigmoid(linear_model)
 
             #Compute the gradients
