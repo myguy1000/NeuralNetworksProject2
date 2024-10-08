@@ -17,7 +17,6 @@ class LogisticRegression:
     def forward(self, inputs):
         linear = np.dot(inputs, self.weights) + self.bias
         pred = self.sigmoid(linear)
-        #print("LogReg pred: ", pred)
         #use threshold to determine Label
         if pred > self.threshold:
             return 1
@@ -30,16 +29,8 @@ class LogisticRegression:
         # Gradient descent
         for _ in range(self.num_epochs):
             #Linear Regression: w.T * X + b
-            #print(inputs.shape)
-            #print(self.weights.shape)
-            #print("weights.shape: ", self.weights.shape)
-            #reshaped_weights = self.weights.reshape(-1,1)
-            #reshaped_weights = self.weights.reshape(1,-1)
-            #print("reshaped_weights.shape: ", reshaped_weights.shape)
             linear_model = np.dot(inputs, self.weights) + self.bias
             #Use sigmoid to get Logistic regression
-            print(f"activation at {count}: ", linear_model)
-            count = count + 1
             pred = self.sigmoid(linear_model)
 
             #Compute the gradients

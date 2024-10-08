@@ -150,6 +150,11 @@ print("breast cancer dataset")
 bc = load_breast_cancer()
 X, y = bc.data, bc.target
 
+# Normalize the input to prevent overflow
+mean = np.mean(X, axis=0)
+std = np.std(X, axis=0)
+X = (X - mean) / std
+
 # Split into train and test datasets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
