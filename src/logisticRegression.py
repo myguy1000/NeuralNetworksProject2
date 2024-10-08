@@ -1,13 +1,15 @@
 import numpy as np
 
 class LogisticRegression:
-    def __init__(self, input_size, min, max, threshold):
+    def __init__(self, input_size, learning_rate, num_epochs, threshold, min, max):
         # Sets the weights and bias to be in the range of -1 to 1.
         # For our standard tests min = -1 and max = 1
         self.weights = np.random.uniform(min, max, input_size)
         self.bias = np.random.uniform(min, max)
         # set threshold to be the threshold value passed in from main
         self.threshold = threshold
+        self.num_epochs = num_epochs
+        self.learning_rate = learning_rate
 
     def sigmoid(self, x):
         return 1 / (1 + np.exp(-x))
@@ -22,10 +24,10 @@ class LogisticRegression:
             return 0
 
     # Training the model using gradient descent
-    def fit(self, inputs, outputs, learning_rate, num_epochs):
-
+    def fit(self, inputs, outputs):
+        count = 0
         # Gradient descent
-        for _ in range(num_epochs):
+        for _ in range(self.num_epochs):
             #Linear Regression: w.T * X + b
             linear_model = np.dot(inputs, self.weights) + self.bias
             #Use sigmoid to get Logistic regression
@@ -36,5 +38,5 @@ class LogisticRegression:
             bias_update = (1 /  len(inputs)) * np.sum(pred - outputs)
 
             #Update weights and bias
-            self.weights -= learning_rate * weight_update
-            self.bias -= learning_rate * bias_update
+            self.weights -= self.learning_rate * weight_update
+            self.bias -= self.learning_rate * bias_update

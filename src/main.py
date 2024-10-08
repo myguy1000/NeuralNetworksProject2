@@ -1,156 +1,220 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import gzip
-from sklearn.datasets import load_digits  # Uncommented to load the digits dataset
-from sklearn.model_selection import train_test_split  # Added for splitting the dataset
-from sklearn.preprocessing import StandardScaler  # Added for data standardization
-# from sklearn.datasets import load_digits, fetch_covtype # Use if importing straight from the website instead of from the downloaded data file
+from sklearn.datasets import load_digits, load_breast_cancer  # Use if importing straight from the website instead of from the downloaded data file
+from sklearn.model_selection import train_test_split
 from utils import incorrectlyClassified, makeCurrentPlot
-from perceptron import Perceptron  # Ensure the class is saved as current_perceptron.py
-from WestonWatkins import WestonWatkinsSVM  # Importing the WestonWatkinsSVM class
+from logisticRegression import LogisticRegression
+from SVM import LSVM
+from WidrowHoff import WidrowHoff
+from WestonWatkins import WestonWatkinsSVM  # Import the WestonWatkinsSVM class
 
-THRESHOLD = 0
-#the magnitude at which the models weights are updated during a single increment
-#lower learning rate may lead to a more accurate result but longer to reach that result
-LEARNING_RATE = 0.1
-#how many times the dataset will be passed through the model
-NUM_EPOCHS = 50
-NUMSAMPLES = 100
-#min value a sample can take
-MINSAMPLESPACE = -100
-#max value a sample can take
-MAXSAMPLESPACE = 100
-
+# Constants
+LEARNING_RATE = 0.01
+NUM_EPOCHS = 100
 
 # Dataset 1: digits
+print("digits dataset")
 digits = load_digits()
 X, y = digits.data, digits.target
 
-#generate Perceptron with input values
-print(X.shape)
-#input_size_1 = 
-maxP = 1
-minP = -1
-#perceptron_1 = Perceptron(input_size_1,minP,maxP,THRESHOLD)
-#perceptron_1.fit(trainingDataX1, trainingDataY1, LEARNING_RATE, NUM_EPOCHS)
+# Convert the original dataset consisting of 10 classes to 2 classes (i.e., binary classification problem)
+mask = (y == 0) | (y == 1)
+X = X[mask]
+y = y[mask]
 
-# ----------------- Weston-Watkins SVM Testing Code -----------------
+# Split into train and test datasets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
-# Split data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+# Define the number of features
+num_inputs = X_train.shape[1]
 
-# Standardize data
-scaler = StandardScaler()
-X_train = scaler.fit_transform(X_train)
-X_test = scaler.transform(X_test)
+# Generate perceptrons with input values
+lr = LogisticRegression(num_inputs, LEARNING_RATE, NUM_EPOCHS, 0.5, -1, 1)  # Third to last arg is the threshold
+svm = LSVM(LEARNING_RATE, NUM_EPOCHS)
+wh = WidrowHoff(num_inputs, LEARNING_RATE, NUM_EPOCHS, -1, 1)
 
-# Initialize the Weston-Watkins SVM
-input_size = X_train.shape[1]
-num_classes = len(np.unique(y))
-svm = WestonWatkinsSVM(
-    input_size=input_size,
+# Instantiate the Weston Watkins SVM for binary classification
+num_classes = 2  # For binary classification
+regularization = 0.01  # Regularization parameter
+ww_svm = WestonWatkinsSVM(
+    input_size=num_inputs,
     num_classes=num_classes,
-    min_value=minP,
-    max_value=maxP,
     learning_rate=LEARNING_RATE,
-    regularization=0.001  # Adjust this regularization parameter as needed
+    num_epochs=NUM_EPOCHS,
+    min_value=-1,
+    max_value=1,
+    regularization=regularization
 )
 
-# Train the model
-svm.fit(X_train, y_train, NUM_EPOCHS)
+# Fit perceptrons
+lr.fit(X_train, y_train)
+svm.fit(X_train, y_train)
+wh.fit(X_train, y_train)
+ww_svm.fit(X_train, y_train)  # Note: Updated to remove num_epochs parameter
 
-# Predict and evaluate
-predictions = svm.predict(X_test)
+# Count the number of misclassified data samples and print
+lr_misclassified_train = incorrectlyClassified(lr, X_train, y_train, "LR")
+lr_misclassified_test = incorrectlyClassified(lr, X_test, y_test, "LR")
+svm_misclassified_train = incorrectlyClassified(svm, X_train, y_train, "SVM")
+svm_misclassified_test = incorrectlyClassified(svm, X_test, y_test, "SVM")
+wh_misclassified_train = incorrectlyClassified(wh, X_train, y_train, "WH")
+wh_misclassified_test = incorrectlyClassified(wh, X_test, y_test, "WH")
 
-# Calculate accuracy
-accuracy = np.mean(predictions == y_test)
-print(f"Weston-Watkins SVM Accuracy: {accuracy}")
+# For Weston Watkins SVM, get predictions and calculate misclassified samples
+ww_predictions_train = ww_svm.predict(X_train)
+ww_predictions_test = ww_svm.predict(X_test)
+ww_misclassified_train = np.sum(ww_predictions_train != y_train)
+ww_misclassified_test = np.sum(ww_predictions_test != y_test)
 
-# -------------------------------------------------------------------
+# Number of samples/rows
+num_samples_train = X_train.shape[0]
+num_samples_test = X_test.shape[0]
 
-# Dataset 2: covtype
-# Open the .gz file and load it into a NumPy array
-with gzip.open('/home/jeremymiddleman/Documents/CS591/assignments/NeuralNetworksProject1/Assignment 2/data/covtype/covtype.data.gz', 'rt') as f:  # 'rt' for reading text
-    data = np.loadtxt(f, delimiter=',')  # Adjust the delimiter if needed (e.g., ',' for CSV)
+print("num samples train: ", num_samples_train)
+print("num samples test: ", num_samples_test)
 
-# Check the shape of the loaded array
-print(data.shape)
-#print(head(data))
+# Results
+print("Logistic Regression train accuracy: ", 1 - (lr_misclassified_train / num_samples_train))
+print("Logistic Regression test accuracy: ", 1 - (lr_misclassified_test / num_samples_test))
 
-#covtype = fetch_covtype()
-#X, y = covtype.data, covtype.target
-#print(X.shape)
+print("SVM train accuracy: ", 1 - (svm_misclassified_train / num_samples_train))
+print("SVM test accuracy: ", 1 - (svm_misclassified_test / num_samples_test))
 
-##Generate data for case #1
-#trainingDataX1, trainingDataY1 = case1Samples()
-#input_size_1 = 2
-#maxP = 1
-#minP = -1
-##generate Perceptron with input values
-#perceptron_1 = Perceptron(input_size_1,minP,maxP,THRESHOLD)
-##Train perceptron using fit
-#perceptron_1.fit(trainingDataX1, trainingDataY1, LEARNING_RATE, NUM_EPOCHS)
-#
-##generate sample data
-#X_test_1, Y_test_1 = case1Samples()
-##Count the number of misclassified data samples and print
-#misclassified_1 = incorrectlyClassified(perceptron_1, X_test_1, Y_test_1)
-#print("The number of samples that have been misclassified for case #1 is: " + str(misclassified_1))
-#
-##Generate the plot for our Case #1
-#makeCurrentPlot(perceptron_1, X_test_1, Y_test_1, title='Case 1: Decision Boundary')
-#
-#
-##Generate Data for Case#2
-#trainingDataX2, trainingDataY2 = case2Samples()
-#input_size_2 = 2
-#maxP = 1
-#minP = -1
-##create perceptron for case 2
-#perceptron_2 = Perceptron(input_size_2,minP,maxP,THRESHOLD)
-#
-##train perceptron2 from the sample cases
-#perceptron_2.fit(trainingDataX2, trainingDataY2, LEARNING_RATE, NUM_EPOCHS)
-##plot the data and make test samples
-#X_test_2, Y_test_2 = case2Samples()
-#misclassified_2 = incorrectlyClassified(perceptron_2, X_test_2, Y_test_2)
-#print("The number of samples that have been misclassified for case #2 is: " + str(misclassified_2))
-#makeCurrentPlot(perceptron_2, X_test_2, Y_test_2, title='Case 2: Decision Boundary')
-#
-## Case 3
-#
-#X_train_3, y_train_3 = case3Samples()
-#perceptron_3 = Perceptron(4,-1,1,THRESHOLD)
-#
-## regular fit function
-#
-#
-##train
-#perceptron_3.fit(X_train_3, y_train_3, LEARNING_RATE, NUM_EPOCHS)
-#
-## Determine count of misclassified samples
-#misclassified_3 = incorrectlyClassified(perceptron_3, X_train_3, y_train_3)
-#print(f"Case 3a: Misclassified samples reg-fit (train) = {misclassified_3}")
-#
-##test
-#X_test_3, y_test_3 = case3Samples()
-#
-## Determine count of misclassified samples
-#misclassified_3 = incorrectlyClassified(perceptron_3, X_test_3, y_test_3)
-#print(f"Case 3b: Misclassified samples reg-fit (test) = {misclassified_3}")
-#
-#
-## GD fit function
-#
-#
-##train
-#perceptron_3.fit_GD(X_train_3, y_train_3, LEARNING_RATE, NUM_EPOCHS)
-#
-## Determine count of misclassified samples
-#misclassified_3 = incorrectlyClassified(perceptron_3, X_train_3, y_train_3)
-#print(f"Case 3c: Misclassified samples GD-fit (train) = {misclassified_3}")
-#
-##test
-## Determine count of misclassified samples
-#misclassified_3 = incorrectlyClassified(perceptron_3, X_test_3, y_test_3)
-#print(f"Case 3d: Misclassified samples GD-fit (test) = {misclassified_3}")
+print("WidrowHoff train accuracy: ", 1 - (wh_misclassified_train / num_samples_train))
+print("WidrowHoff test accuracy: ", 1 - (wh_misclassified_test / num_samples_test))
+
+print("Weston Watkins SVM train accuracy: ", 1 - (ww_misclassified_train / num_samples_train))
+print("Weston Watkins SVM test accuracy: ", 1 - (ww_misclassified_test / num_samples_test))
+
+# --------------------------------------------------------------
+# Part 4: Testing the Weston-Watkins SVM using a scikit-learn dataset for multiclass classification.
+
+print("\nDigits dataset (Multiclass Classification)")
+
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+# Load the digits dataset with all classes
+digits = load_digits()
+X_multi, y_multi = digits.data, digits.target
+
+# Split into train and test datasets
+X_train_multi, X_test_multi, y_train_multi, y_test_multi = train_test_split(X_multi, y_multi, test_size=0.2, random_state=42)
+
+# Number of classes
+num_classes_multi = len(np.unique(y_multi))
+print("Number of classes:", num_classes_multi)
+
+# Define the number of features
+num_inputs_multi = X_train_multi.shape[1]
+
+# Instantiate the Weston Watkins SVM for multiclass classification
+ww_svm_multi = WestonWatkinsSVM(
+    input_size=num_inputs_multi,
+    num_classes=num_classes_multi,
+    learning_rate=LEARNING_RATE,
+    num_epochs=NUM_EPOCHS,
+    min_value=-1,
+    max_value=1,
+    regularization=regularization
+)
+
+# Fit the model
+ww_svm_multi.fit(X_train_multi, y_train_multi)
+
+# Predict on training and test data
+ww_predictions_train_multi = ww_svm_multi.predict(X_train_multi)
+ww_predictions_test_multi = ww_svm_multi.predict(X_test_multi)
+
+# Calculate accuracies
+ww_train_accuracy_multi = accuracy_score(y_train_multi, ww_predictions_train_multi)
+ww_test_accuracy_multi = accuracy_score(y_test_multi, ww_predictions_test_multi)
+
+# Print the results
+print("Weston Watkins SVM train accuracy (multiclass):", ww_train_accuracy_multi)
+print("Weston Watkins SVM test accuracy (multiclass):", ww_test_accuracy_multi)
+
+# Optionally, print classification report and confusion matrix
+print("\nClassification Report (Test Data):")
+print(classification_report(y_test_multi, ww_predictions_test_multi))
+
+print("\nConfusion Matrix (Test Data):")
+print(confusion_matrix(y_test_multi, ww_predictions_test_multi))
+
+
+
+
+
+
+# Dataset 2: breast cancer
+print("breast cancer dataset")
+bc = load_breast_cancer()
+X, y = bc.data, bc.target
+
+# Normalize the input to prevent overflow
+mean = np.mean(X, axis=0)
+std = np.std(X, axis=0)
+X = (X - mean) / std
+
+# Split into train and test datasets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+# Define the number of features
+num_inputs = X_train.shape[1]
+
+# Generate perceptrons with input values
+lr = LogisticRegression(num_inputs, LEARNING_RATE, NUM_EPOCHS, 0.5, -1, 1)  # Third to last arg is the threshold
+svm = LSVM(LEARNING_RATE, NUM_EPOCHS)
+wh = WidrowHoff(num_inputs, LEARNING_RATE, NUM_EPOCHS, -1, 1)
+
+# Instantiate the Weston Watkins SVM for binary classification
+num_classes = 2  # For binary classification
+regularization = 0.01  # Regularization parameter
+ww_svm = WestonWatkinsSVM(
+    input_size=num_inputs,
+    num_classes=num_classes,
+    learning_rate=LEARNING_RATE,
+    num_epochs=NUM_EPOCHS,
+    min_value=-1,
+    max_value=1,
+    regularization=regularization
+)
+
+# Fit perceptrons
+lr.fit(X_train, y_train)
+svm.fit(X_train, y_train)
+wh.fit(X_train, y_train)
+ww_svm.fit(X_train, y_train)  # Note: Updated to remove num_epochs parameter
+
+# Count the number of misclassified data samples and print
+lr_misclassified_train = incorrectlyClassified(lr, X_train, y_train, "LR")
+lr_misclassified_test = incorrectlyClassified(lr, X_test, y_test, "LR")
+svm_misclassified_train = incorrectlyClassified(svm, X_train, y_train, "SVM")
+svm_misclassified_test = incorrectlyClassified(svm, X_test, y_test, "SVM")
+wh_misclassified_train = incorrectlyClassified(wh, X_train, y_train, "WH")
+wh_misclassified_test = incorrectlyClassified(wh, X_test, y_test, "WH")
+
+# For Weston Watkins SVM, get predictions and calculate misclassified samples
+ww_predictions_train = ww_svm.predict(X_train)
+ww_predictions_test = ww_svm.predict(X_test)
+ww_misclassified_train = np.sum(ww_predictions_train != y_train)
+ww_misclassified_test = np.sum(ww_predictions_test != y_test)
+
+# Number of samples/rows
+num_samples_train = X_train.shape[0]
+num_samples_test = X_test.shape[0]
+
+print("num samples train: ", num_samples_train)
+print("num samples test: ", num_samples_test)
+
+# Results
+print("Logistic Regression train accuracy: ", 1 - (lr_misclassified_train / num_samples_train))
+print("Logistic Regression test accuracy: ", 1 - (lr_misclassified_test / num_samples_test))
+
+print("SVM train accuracy: ", 1 - (svm_misclassified_train / num_samples_train))
+print("SVM test accuracy: ", 1 - (svm_misclassified_test / num_samples_test))
+
+print("WidrowHoff train accuracy: ", 1 - (wh_misclassified_train / num_samples_train))
+print("WidrowHoff test accuracy: ", 1 - (wh_misclassified_test / num_samples_test))
+
+print("Weston Watkins SVM train accuracy: ", 1 - (ww_misclassified_train / num_samples_train))
+print("Weston Watkins SVM test accuracy: ", 1 - (ww_misclassified_test / num_samples_test))

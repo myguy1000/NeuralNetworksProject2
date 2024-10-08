@@ -1,23 +1,50 @@
 import numpy as np
 import matplotlib.pyplot as plt 
-import gzip
-from sklearn.datasets import load_digits, fetch_covtype # use if importing straight from the website instead of from the downloaded data file
-from perceptron import Perceptron  # Ensure the class is saved as current_perceptron.py
 
 """
 incorrectlyClassified examines each data point and determines if it is correctly classified into the correct class
 returns an integer number that is the number of data points/samples that have been misclassified
 """
-def incorrectlyClassified(perceptron, xInputs, yInputs):
-    incorrect = 0
-    for i in range(len(xInputs)):
-        nextPrediction = perceptron.forward(xInputs[i])
-        correct = yInputs[i]
-        if nextPrediction != correct:
-            incorrect = incorrect + 1
-        else:
-            incorrect = incorrect + 0
-    return incorrect
+def incorrectlyClassified(perceptron, xInputs, yInputs, p_type): 
+    if p_type == "SVM":
+        incorrect = 0
+
+        for i in range(len(xInputs)):
+            nextPrediction = perceptron.predict(np.array([xInputs[i]]))  # Get prediction for a single point
+
+            correct = 1 if yInputs[i] == nextPrediction else 0  # Convert correct labels to +1 and -1
+            if correct != 1:
+                incorrect += 1
+        return incorrect
+
+    elif p_type == "WH":
+
+        incorrect = 0
+        for i in range(len(xInputs)):
+            nextPrediction = perceptron.forward(xInputs[i])
+
+            ###            print("current prediction: ", nextPrediction)
+            correct = yInputs[i]
+            #print("NEXT PREDICTION: " + str(nextPrediction))
+            #print("Correct: " + str(correct))
+            if nextPrediction != correct:
+                incorrect = incorrect + 1
+            else:
+                incorrect = incorrect + 0
+        return incorrect
+    else:
+
+        incorrect = 0
+        for i in range(len(xInputs)):
+            nextPrediction = perceptron.forward(xInputs[i])
+###            print("current prediction: ", nextPrediction)
+
+            correct = yInputs[i]
+            if nextPrediction != correct:
+                incorrect = incorrect + 1
+            else:
+                incorrect = incorrect + 0
+        return incorrect
 
 """
 Uses matplot lib to make a plot that shows the data points (colored) and the separation hyperplane
